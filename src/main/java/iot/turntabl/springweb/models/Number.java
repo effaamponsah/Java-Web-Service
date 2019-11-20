@@ -3,7 +3,8 @@ package iot.turntabl.springweb.models;
 public class Number {
     private int value;
 
-    public Number() {
+    public Number(int value) {
+        this.value=value;
     }
 
     public int getValue() {
