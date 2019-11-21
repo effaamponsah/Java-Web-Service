@@ -46,7 +46,7 @@ public class SpringwebApplication {
 				}
 			};
 				jedis.ping();
-				jedis.subscribe(jedisPubSub, "cusotmerUpdates", "customerDelete");
+				jedis.subscribe(jedisPubSub, "cusotmerUpdates", "customerDelete","removed");
 		}
 		catch (Exception e){
 			System.out.printf("Exc:::  "+e.getMessage());
