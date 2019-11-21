@@ -19,17 +19,28 @@ import java.util.concurrent.CountDownLatch;
 @EnableSwagger2
 @SpringBootApplication
 public class SpringwebApplication {
-
 	@Bean
 	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory, MessageListenerAdapter listenerAdapter) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
-		container.addMessageListener(listenerAdapter, new PatternTopic("customer"));
+		container.addMessageListener(listenerAdapter, new PatternTopic("added"));
+		return container;
+	}
+	@Bean
+	RedisMessageListenerContainer removedContainer(RedisConnectionFactory connectionFactory, MessageListenerAdapter removedAdapter) {
+		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+		container.setConnectionFactory(connectionFactory);
+		container.addMessageListener(removedAdapter, new PatternTopic("removed"));
 		return container;
 	}
 	@Bean
 	MessageListenerAdapter listenerAdapter(Receiver receiver) {
-		return new MessageListenerAdapter(receiver, "receiveMessage");
+		return new MessageListenerAdapter(receiver, "addedMessage");
+	}
+
+	@Bean
+	MessageListenerAdapter removedAdapter(Receiver receiver){
+		return new MessageListenerAdapter(receiver, "removeMessage");
 	}
 
 	@Bean
@@ -49,7 +60,7 @@ public class SpringwebApplication {
 
 
 	public static void main(String[] args) throws InterruptedException {
-//		SpringApplication.run(SpringwebApplication.class, args);
+	//		SpringApplication.run(SpringwebApplication.class, args);
 		ApplicationContext ctx = SpringApplication.run(SpringwebApplication.class, args);
 
 //        StringRedisTemplate template = ctx.getBean(StringRedisTemplate.class);

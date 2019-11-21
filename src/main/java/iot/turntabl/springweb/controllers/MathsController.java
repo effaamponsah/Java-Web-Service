@@ -22,7 +22,7 @@ public class MathsController {
             @RequestParam(value = "num2") String num2){
         Integer number1 = Integer.parseInt(num1);
         Integer number2 = Integer.parseInt(num2);
-        return new Number(this.ops.add(number1, number2));
+        return new Number(this.ops.add(number1, number2));  
     }
 
     @ApiOperation("Subtracts two numbers passed as parameters to route and returns the result")
