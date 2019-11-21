@@ -12,55 +12,52 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPubSub;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 
 @EnableSwagger2
 @SpringBootApplication
 public class SpringwebApplication {
 
-	@Bean
-	RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory, MessageListenerAdapter listenerAdapter) {
-		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-		container.setConnectionFactory(connectionFactory);
-		container.addMessageListener(listenerAdapter, new PatternTopic("customer"));
-		return container;
-	}
-	@Bean
-	MessageListenerAdapter listenerAdapter(Receiver receiver) {
-		return new MessageListenerAdapter(receiver, "receiveMessage");
-	}
+	public static void main(String[] args) throws InterruptedException, URISyntaxException {
+		SpringApplication.run(SpringwebApplication.class, args);
 
-	@Bean
-	Receiver receiver(CountDownLatch latch) {
-		return new Receiver(latch);
-	}
-
-	@Bean
-	CountDownLatch latch() {
-		return new CountDownLatch(1);
-	}
-
-	@Bean
-	StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
-		return new StringRedisTemplate(connectionFactory);
-	}
-
-
-	public static void main(String[] args) throws InterruptedException {
-//		SpringApplication.run(SpringwebApplication.class, args);
-		ApplicationContext ctx = SpringApplication.run(SpringwebApplication.class, args);
-
-//        StringRedisTemplate template = ctx.getBean(StringRedisTemplate.class);
-//        CountDownLatch latch = ctx.getBean(CountDownLatch.class);
-
-//        LOGGER.info("Sending message...");
-//        template.convertAndSend("customer", "New customer created");
-
-//        latch.await();
+		Jedis  jedis = new Jedis(System.getenv("REDIS_URL"));
+		try {
+			jedis = new Jedis(System.getenv("REDIS_URL"));
+			JedisPubSub jedisPubSub = new JedisPubSub() {
+				@Override
+				public void onMessage(String channel, String message) {
+					System.out.println("Channel " + channel + " has sent a message : " + message );
+//					write the message to file
+//					if(channel.equals("C1")) {
+//						/* Unsubscribe from channel C1 after first message is received. */
+//						unsubscribe(channel);
+//					}
+				}
+				@Override
+				public void onSubscribe(String channel, int subscribedChannels) {
+					System.out.println("Client is Subscribed to channel : "+ channel);
+				}
+			};
+				jedis.subscribe(jedisPubSub, "cusotmerUpdates", "customerDelete");
+		}
+		catch (Exception e){
+			System.out.printf("Exc:::  "+e.getMessage());
+		}
+		finally {
+			if(jedis != null) {
+				jedis.close();
+			}
+		}
 
 	}
+
 
 	@Bean
 	public Maths ops(){
