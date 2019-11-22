@@ -47,7 +47,9 @@ public class SpringwebApplication {
 					System.out.println("Client is Subscribed to channel : "+ channel);
 				}
 			};
-				jedis.subscribe(jedisPubSub, "customerchanges", "customerdelete","removed","projectremoved","projectchanges","addcustomer");
+
+				jedis.ping();
+				jedis.subscribe(jedisPubSub, "cusotmerUpdates", "customerDelete","removed");
 		}
 		catch (Exception e){
 			System.out.printf("Exception:::  "+e.getMessage());
