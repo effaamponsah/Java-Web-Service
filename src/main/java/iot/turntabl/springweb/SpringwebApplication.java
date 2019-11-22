@@ -1,6 +1,7 @@
 package iot.turntabl.springweb;
 
 import iot.turntabl.springweb.controllers.Maths;
+import iot.turntabl.springweb.utils.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -16,6 +17,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
@@ -34,22 +36,21 @@ public class SpringwebApplication {
 				@Override
 				public void onMessage(String channel, String message) {
 					System.out.println("Channel " + channel + " has sent a message : " + message );
-//					write the message to file
-//					if(channel.equals("C1")) {
-//						/* Unsubscribe from channel C1 after first message is received. */
-//						unsubscribe(channel);
-//					}
+					try {
+						Logging.writeToFile(channel, message);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 				@Override
 				public void onSubscribe(String channel, int subscribedChannels) {
 					System.out.println("Client is Subscribed to channel : "+ channel);
 				}
 			};
-				jedis.ping();
-				jedis.subscribe(jedisPubSub, "cusotmerUpdates", "customerDelete");
+				jedis.subscribe(jedisPubSub, "customerchanges", "customerdelete","removed","projectremoved","projectchanges","addcustomer");
 		}
 		catch (Exception e){
-			System.out.printf("Exc:::  "+e.getMessage());
+			System.out.printf("Exception:::  "+e.getMessage());
 		}
 		finally {
 			if(jedis != null) {
